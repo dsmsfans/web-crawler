@@ -1,10 +1,14 @@
 import requests
 from bs4 import BeautifulSoup
 import json
+import os
+
+if not os.path.exists("output"):
+    os.makedirs("output")
 
 test = open("test.txt","w",encoding='UTF-8')
 
-#版的url
+#Select Section
 board = "dressup"
 
 p = requests.Session()
@@ -27,27 +31,27 @@ for k in range(0,10):
         for u in range(len(data2)):
             Temporary_url = f"/f/{board}/p/"+ str(data2[u]["id"]) + "-" + str(data2[u]["title"].replace(" ","-"))
             a.append(Temporary_url)
-j=0 #為了印頁數
-q=0 #為了印張數
-for i in a[2:]:
+
+num = 0
+
+for url_index,i in enumerate(a[2:]):
     url = "https://www.dcard.tw"+i
-    j+=1
-    print ("第",j,"頁的URL為:"+url)
-    #file.write("temperature is {} wet is {}%\n".format(temperature, humidity))
-    test.write("第 {} 頁的URL為: {} \n".format(j,url))
+    print (f"Page {url_index}'s URL: {url}")
+    test.write(f"Page {url_index}'s URL: {url}")
     url=requests.get(url)
     soup = BeautifulSoup(url.text,"html.parser")
     sel_jpg = soup.select("div.Post_content_NKEl9d div div div img")
-    for c in sel_jpg:
-        q+=1
-        print("第",q,"張:",c["src"])
-        test.write("%\n""第 {} 張: {} \n".format(q,c["src"])) 
-        pic=requests.get(c["src"])
+    for j in sel_jpg:
+        num += 1
+        print(f"Picture {num} :",j["src"])
+        test.write(f"Picture {num} :" + j["src"]) 
+        pic=requests.get(j["src"])
         img2 = pic.content
-        pic_out = open("output/"+str(q)+".jpg",'wb')
+        pic_out = open("output/"+str(num)+".jpg",'wb')
         pic_out.write(img2)
         pic_out.close()
 
 test.close()
-print("爬蟲結束")
+print(f"Total {num} pictures")
+print("Done")
 
